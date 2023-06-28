@@ -15,7 +15,6 @@ const Contact = ({ navigation }) => {
         axios.get('http://localhost:3030/user')
             .then(res => {
                 setData(res.data);
-                console.log("res===>", res.data);
             })
             .catch(error => {
                 console.log("Error fetching data:", error);

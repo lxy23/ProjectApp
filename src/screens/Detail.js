@@ -1,17 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
-import {View,Text,TextInput} from "react-native";
+import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
-const Detail = ({ route, navigation }) =>{
+import axios from 'axios';
 
+const Detail = ({ route, navigation }) => {
     const firstNameRef = useRef(null);
     const lastNameRef = useRef(null);
     const emailRef = useRef(null);
     const phoneRef = useRef(null);
-
+    const [id, setId] = useState(route.params.id);
     const [firstName, setFistName] = useState(route.params.firstname);
     const [lastName, setLastName] = useState(route.params.lastname);
     const [email, setEmail] = useState(route.params.email);
     const [phone, setPhone] = useState(route.params.phone);
+    const [personData, setPersonData] = useState(route.params.data);
 
     const InputList = ({ name, ref, value, onChange }) => (
         <View style={{ flexDirection: 'row', height: 30, width: '100%', alignItems: 'center', marginVertical: 10 }}>
@@ -42,8 +44,43 @@ const Detail = ({ route, navigation }) =>{
         </View>
     );
 
+    function update() {
+        const matchedItem = personData.find((item) => item.id === id);
+        if (matchedItem) {
+            const updatedItem = {
+                ...matchedItem,
+                firstName,
+                lastName,
+                email,
+                phone,
+            };
 
-    return(
+            axios.put(`http://localhost:3030/user/${id}`, updatedItem)
+                .then(response => {
+                    navigation.navigate('Contact');
+                })
+                .catch(error => {
+                    console.error('Error updating data:', error);
+                });
+        }
+    }
+
+    useEffect(() => {
+        navigation.setOptions({
+            headerLeft: () => (
+                <TouchableOpacity onPress={() => navigation.navigate('Contact')}>
+                    <Text style={{ marginLeft: 10, fontSize: 16,color:'#ff8c00' }}>Cancel</Text>
+                </TouchableOpacity>
+            ),
+            headerRight: () => (
+                <TouchableOpacity onPress={update}>
+                    <Text style={{ marginRight: 10, fontSize: 16, color:'#ff8c00'}}>Save</Text>
+                </TouchableOpacity>
+            ),
+        });
+    }, [navigation, update]);
+
+    return (
         <View style={{ flex: 1 }}>
             <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                 <Svg height={200} width={200}>
@@ -66,8 +103,7 @@ const Detail = ({ route, navigation }) =>{
                 <InputList name={'Phone'} ref={phoneRef} value={phone} onChange={setPhone} />
             </View>
         </View>
-    )
+    );
+};
 
-}
-
-export default Detail
+export default Detail;
