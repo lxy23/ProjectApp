@@ -1,9 +1,34 @@
-import React from 'react-native'
+import React, { useEffect, useState } from "react";
 import { FlatList, SafeAreaView, Text, TouchableOpacity, View, RefreshControl } from "react-native";
-import data from '../../data.json'
 import Svg, { Circle } from "react-native-svg";
+import axios from 'axios';
 
-const Contact = ({ navigation }) =>{
+const Contact = ({ navigation }) => {
+    const [data, setData] = useState([]);
+    const [refreshing, setRefreshing] = useState(false);
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = () => {
+        axios.get('http://localhost:3030/user')
+            .then(res => {
+                setData(res.data);
+                console.log("res===>", res.data);
+            })
+            .catch(error => {
+                console.log("Error fetching data:", error);
+            })
+            .finally(() => {
+                setRefreshing(false);
+            });
+    };
+
+    const onRefresh = () => {
+        setRefreshing(true);
+        fetchData();
+    };
 
     const ListItem = ({ item }) => (
         <TouchableOpacity
@@ -29,8 +54,7 @@ const Contact = ({ navigation }) =>{
         </TouchableOpacity>
     );
 
-
-    return(
+    return (
         <SafeAreaView style={{ flex: 1 }}>
             <FlatList
                 data={data}
@@ -38,11 +62,15 @@ const Contact = ({ navigation }) =>{
                     <ListItem item={item} />
                 )}
                 keyExtractor={item => item.id}
-
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                    />
+                }
             />
         </SafeAreaView>
-    )
+    );
+};
 
-}
-
-export default Contact
+export default Contact;
