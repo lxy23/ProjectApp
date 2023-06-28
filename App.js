@@ -30,6 +30,9 @@ const App = () => {
                 <Stack.Screen
                     name="Detail"
                     component={Detail}
+                    options={() => ({
+                        headerTitle: '',
+                    })}
                 />
             </Stack.Navigator>
         </NavigationContainer>
